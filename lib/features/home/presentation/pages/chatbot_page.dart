@@ -11,48 +11,44 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-
 class _HomePageState extends State<HomePage> {
   final TextEditingController _messageController = TextEditingController();
   final _scrollController = ScrollController();
-  
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeIn,
+        );
       }
-          });
+    });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
-
-
-    return BlocConsumer<MessageAICubit,MessageAIState>(
+    return BlocConsumer<MessageAICubit, MessageAIState>(
       listener: (context, state) {
         _scrollToBottom();
         if (state is MessageAIError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
-      builder: (context, state){
+      builder: (context, state) {
         List<MessageModel> messages = [];
-        
+
         if (state is MessageAILoading) {
-          return const Center(child: CircularProgressIndicator(),);
+          return const Center(child: CircularProgressIndicator());
         } else if (state is MessageAILoaded) {
           messages = state.messages;
         }
         return Scaffold(
           appBar: AppBar(
-            backgroundColor:  Color.fromARGB(255, 163, 196, 249),
+            backgroundColor: Color.fromARGB(255, 163, 196, 249),
             title: const Text('Home Page'),
           ),
           body: Column(
@@ -62,21 +58,23 @@ class _HomePageState extends State<HomePage> {
                 child: ListView.builder(
                   controller: _scrollController,
                   itemCount: messages.length,
-                  itemBuilder: (_, index){
-
-                    return messages[index].role == MessageType.user ? 
-                    Card(
-                      margin: const EdgeInsets.only(left: 100,right: 10),
-                      color: Colors.grey[200],
-                      child: ListTile(
-                        title: Text(messages[index].content ?? ''),
-                        subtitle: const Text('User') 
-                      ),
-                    ) : ListTile(
-                      title: Text(messages[index].content ?? ''),
-                      subtitle: const Text('AI')
-                    );
-          })),
+                  itemBuilder: (_, index) {
+                    return messages[index].role == MessageType.user
+                        ? Card(
+                            margin: const EdgeInsets.only(left: 100, right: 10),
+                            color: Colors.grey[200],
+                            child: ListTile(
+                              title: Text(messages[index].content ?? ''),
+                              subtitle: const Text('User'),
+                            ),
+                          )
+                        : ListTile(
+                            title: Text(messages[index].content ?? ''),
+                            subtitle: const Text('AI'),
+                          );
+                  },
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -99,16 +97,14 @@ class _HomePageState extends State<HomePage> {
                           _messageController.clear();
                         }
                       },
-                    )
+                    ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         );
-
-   }
-  );
- }
- 
+      },
+    );
+  }
 }
