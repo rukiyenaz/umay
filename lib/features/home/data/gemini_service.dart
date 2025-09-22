@@ -1,17 +1,15 @@
 import 'dart:convert';
 
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gebelik_aapp/features/home/domain/repositories/message_ai_repo.dart';
 import 'package:http/http.dart' as http;
 
-
 class GeminiAIService implements MessageAIRepository {
-  
-
-  final String apiKey = dotenv.env['GENERATIVE_AI_API_KEY']!; // .env dosyasına taşınabilir
+  final String apiKey =
+      dotenv.env['GENERATIVE_AI_API_KEY']!; // .env dosyasına taşınabilir
   final String model = 'gemini-2.0-flash'; // veya gemini-pro vs
 
+  @override
   Future<String> getGeminiResponse(String prompt) async {
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
@@ -21,7 +19,9 @@ class GeminiAIService implements MessageAIRepository {
       "contents": [
         {
           "parts": [
-            {"text": """Sen bir gebelik danışmanı asistanısın. Kullanıcı sana hamileliği ile ilgili sorular soracak. 
+            {
+              "text":
+                  """Sen bir gebelik danışmanı asistanısın. Kullanıcı sana hamileliği ile ilgili sorular soracak. 
             Cevaplarını şu kurallara göre ver:
 
             1. Her zaman güvenli, anlaşılır ve empatik bir dil kullan.  
@@ -39,16 +39,15 @@ class GeminiAIService implements MessageAIRepository {
             7. Kullanıcıya güven verici, destekleyici ve moral yükseltici bir üslup kullan.  
 
             Senin rolün: Bir gebelik danışmanı gibi rehberlik etmek, anneleri bilinçlendirmek ve destek olmaktır.
-            """},
-            {"text": prompt}
-          ]
-        }
-      ]
+            """,
+            },
+            {"text": prompt},
+          ],
+        },
+      ],
     });
 
-    final headers = {
-      'Content-Type': 'application/json',
-    };
+    final headers = {'Content-Type': 'application/json'};
 
     try {
       final response = await http.post(url, headers: headers, body: body);
@@ -56,7 +55,7 @@ class GeminiAIService implements MessageAIRepository {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final text = data['candidates'][0]['content']['parts'][0]['text'];
-        String responseMessage= text.trim();
+        String responseMessage = text.trim();
         return responseMessage;
       } else {
         print("Hata: ${response.statusCode} => ${response.body}");
