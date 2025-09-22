@@ -2,7 +2,10 @@ import 'dart:convert';
 
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gebelik_aapp/features/home/domain/entities/chat_session.dart';
+import 'package:gebelik_aapp/features/home/domain/entities/message_model.dart';
 import 'package:gebelik_aapp/features/home/domain/repositories/message_ai_repo.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 
@@ -13,9 +16,19 @@ class GeminiAIService implements MessageAIRepository {
   final String model = 'gemini-2.0-flash'; // veya gemini-pro vs
 
   Future<String> getGeminiResponse(String prompt) async {
+    final box = Hive.box<ChatSession>('chat_sessions');
+    final messages = box.values.toList();
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
     );
+
+    // Örnek: Son 10 mesajı al
+    final lastMessages = messages.length > 10 
+        ? messages.sublist(messages.length - 10)
+        : messages;
+
+    // Gemini promptu oluştur
+    final lastPromt = lastMessages.map((m) => "${m.messages.last.role}: ${m.messages.last.content}").join("\n");
 
     final body = jsonEncode({
       "contents": [
@@ -40,7 +53,8 @@ class GeminiAIService implements MessageAIRepository {
 
             Senin rolün: Bir gebelik danışmanı gibi rehberlik etmek, anneleri bilinçlendirmek ve destek olmaktır.
             """},
-            {"text": prompt}
+            {"text": prompt},
+            {"text": lastPromt}
           ]
         }
       ]

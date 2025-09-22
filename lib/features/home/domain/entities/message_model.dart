@@ -1,9 +1,17 @@
-enum MessageType { user, ai }
+import 'package:hive/hive.dart';
 
-class MessageModel {
-  final String id;
-  final MessageType role;
+part 'message_model.g.dart'; // Bu dosya build_runner ile üretilecek
+
+
+@HiveType(typeId: 0)
+class MessageModel extends HiveObject {
+  @HiveField(0)
+  final String? id;
+  @HiveField(1)
+  final String role;
+  @HiveField(2)
   final String content;
+  @HiveField(3)
   final DateTime timestamp;
 
   MessageModel({required this.id, required this.role, required this.content, DateTime? timestamp})
@@ -20,7 +28,6 @@ class MessageModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'role': role,
       'content': content,
       'timestamp': timestamp.toIso8601String(),
