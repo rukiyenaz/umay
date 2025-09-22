@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gebelik_aapp/features/auth/data/firebase_auth_service.dart';
+import 'package:gebelik_aapp/features/auth/domain/repositories/auth_repo.dart';
+import 'package:gebelik_aapp/features/auth/presentation/cubits/cubit.dart';
 import 'package:gebelik_aapp/features/egzersiz-beslenme/presentation/page/beslenme_page.dart';
 import 'package:gebelik_aapp/features/egzersiz-beslenme/presentation/page/egzersiz_page.dart';
 import 'package:gebelik_aapp/features/home/data/gemini_service.dart';
@@ -46,10 +49,12 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   MessageAIRepository messageaiRepo = GeminiAIService();
+  AuthRepo authRepo = FirebaseAuthService();
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(providers: <BlocProvider>[
+      BlocProvider(create: (context) => AuthCubit(authRepo: authRepo)),
       BlocProvider<MessageAICubit>(
         create: (context) => MessageAICubit(repository: messageaiRepo),
       ),
